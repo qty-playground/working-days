@@ -188,7 +188,7 @@ function Get-DisplayStatus {
 }
 
 # ============================================================
-# Section 3: Setup (stubs - not yet implemented)
+# Section 3: Setup
 # ============================================================
 
 function Set-NetworkIP {
