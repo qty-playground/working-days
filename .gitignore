@@ -11,3 +11,6 @@ build/
 .env
 .DS_Store
 *.log
+
+# Compiled binaries
+scripts/screenshot
