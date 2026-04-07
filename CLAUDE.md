@@ -27,3 +27,12 @@
 ### 規則管理
 - 發現重要規則時，詢問是否加入 CLAUDE.md
 - 學到新知識時，立即記錄日誌到 docs/
+
+## 工作環境
+- 專案內有 venv 時，優先使用專案的 venv
+- 永遠以 project root 作為工作目錄
+
+## Retrospective
+- 工作過程中適時將學到的重點整理進 CLAUDE.md
+- 修改 CLAUDE.md 前須獲得使用者同意
+- 發現重要規則時，詢問是否加入 CLAUDE.md
