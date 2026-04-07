@@ -107,22 +107,88 @@ E2 整體 coverage 71.5%，on-demand $51.33/天，covered $36.72/天，uncovered
 
 ## CUD scope 規則
 
-- Project-scoped CUD：優先給該 project 消耗
-- Billing account-scoped CUD：整個 billing account 共用
-- 當兩者並存時，project-scoped 先消耗
-- 如果 project-scoped CUD 用不完，剩餘量會回流給同 billing account 下其他 project
+- 目前所有 CUD 的 scope 都是 billing account 層級（頁面上顯示 "Resource-based CUDs scope: Billing account"）
+- CSV 裡的 "Subscription Container: Project XXX" 只是記錄在哪個 project 下購買，不代表只給該 project 用
+- 整個 billing account 下同 region 同 machine family 的用量都會自動消耗 CUD
+
+## CUD 清單（從 CUD list > Download CSV > Full list 取得）
+
+### Active CUDs
+
+| Name | Family | Cores | Memory | 購買 Project | Term | Start | End |
+|---|---|---|---|---|---|---|---|
+| commitment-20260402-084919 | E2 | 24 vCPU | — | ScreenMax Beta | 1 year | 2026-04-03 | 2027-04-03 |
+| commitment-20240912-032026 | E2 | 2 vCPU | 8 GB | PMAX 3 | 3 years | 2024-09-12 | 2027-09-12 |
+| commitment-20250807-065755 | E2 | 60 vCPU | 250 GB | PChome EC RMN Beta | 3 years | 2025-08-08 | 2028-08-08 |
+
+E2 Active 合計：86 vCPU / 258 GB
+
+### 最近 Expired 的 CUDs（4/2~4/7 到期）
+
+| Name | Family | Cores | Memory | 購買 Project | Term | End |
+|---|---|---|---|---|---|---|
+| commitment-20250402-074214 | N2 | 24 vCPU | 96 GB | Bidding Engine | 1 year | 2026-04-03 |
+| commitment-20250402-075503 | N2 | 8 vCPU | 32 GB | Supply Side Platform | 1 year | 2026-04-03 |
+| commitment-20250407-025753 | N2 | 20 vCPU | 80 GB | Bidding Engine | 1 year | 2026-04-07 |
+| commitment-20250407-merged | N2 | 44 vCPU | 176 GB | Bidding Engine | Custom | 2026-04-07 |
+| commitment-20250402-080155 | E2 | 6 vCPU | 24 GB | PIC DOOH | 1 year | 2026-04-03 |
+| commitment-20250401-095006 | N1 | 16 vCPU | 87.5 GB | PVMax | 1 year | 2026-04-02 |
+
+Expired 合計：
+- N2: 96 vCPU / 384 GB（bidding-engine + supply-side-platform 全部回到 on-demand）
+- E2: 6 vCPU / 24 GB（上週新買 24 vCPU 但同時 expired 6 vCPU，淨增 +18 vCPU）
+- N1: 16 vCPU / 87.5 GB
+
+### 更早的 Expired CUDs
+
+| Name | Family | Cores | Memory | 購買 Project | Term | End |
+|---|---|---|---|---|---|---|
+| commitment-1 (2022) | N1 | 17 vCPU | 95 GB | PVMax | 3 years | 2025-03-10 |
+| commitment-1 (2020) | N1 | 20 vCPU | 100 GB | PVMax | 1 year | 2021-05-16 |
+
+## 每日 CUD Coverage（4/1~4/6, All resource types, asia-east1）
+
+### 整體
+
+| Date | On-demand | Covered | Uncovered | Coverage |
+|---|---|---|---|---|
+| 4/1 | $265.17 | $129.34 | $135.83 | 48.8% |
+| 4/2 | $233.55 | $119.65 | $113.89 | 51.2% |
+| 4/3 | $222.53 | $115.05 | $107.48 | 51.7% |
+| 4/4 | $221.75 | $114.79 | $106.96 | 51.8% |
+| 4/5 | $222.76 | $115.12 | $107.64 | 51.7% |
+| 4/6 | $166.70 | $75.52 | $91.18 | 45.3% |
+
+### By Machine Family
+
+| Date | E2 total | E2 cov% | N2 total | N2 cov% | N1 total | N1 cov% | SSD total | SSD cov% |
+|---|---|---|---|---|---|---|---|---|
+| 4/1 | $60.44 | 69.3% | $85.54 | 82.0% | $11.87 | 100% | $9.84 | 0% |
+| 4/2 | $78.95 | 63.9% | $69.74 | 99.3% | $0.03 | 0% | $9.82 | 0% |
+| 4/3 | $69.77 | 79.8% | $69.25 | 85.7% | $0.00 | 0% | $9.83 | 0% |
+| 4/4 | $68.99 | 80.3% | $69.25 | 85.7% | $0.00 | 0% | $9.83 | 0% |
+| 4/5 | $70.00 | 79.6% | $69.25 | 85.7% | $0.00 | 0% | $9.83 | 0% |
+| 4/6 | $51.33 | 71.5% | $50.94 | 76.2% | $0.00 | 0% | $7.28 | 0% |
+
+### 變化分析
+
+- N1: 4/1 $11.87 且 100% covered → 4/2 起 PVMax CUD expired，N1 用量幾乎歸零（可能 VM 也關了）
+- N2: 4/1 82% → 4/3 起部分 CUD expired 降到 85.7% → 4/6 再降 76.2%，4/7 大批 expired 後會更低
+- E2: 4/1 69.3% → 4/3 新買 24 vCPU 生效跳到 79.8%（同時 PIC DOOH 6 vCPU expired，淨增 18 vCPU）→ 4/6 降回 71.5%
+- SSD: 全程 0%，完全沒有 CUD
 
 ## 結論與行動項目
 
-1. N2 CUD 已 expired → 會再買（bidding-engine-prod + supply-side-platform-prod 每月省 ~$1,457）
-2. E2 CUD 量不夠 → 大部分 project 只有 ~42% coverage，需要加購
+1. N2 CUD 全部 expired（96 vCPU / 384 GB）→ 會再買，主要是 bidding-engine-prod 和 supply-side-platform-prod
+2. E2 CUD 量不夠 → 上週買了 24 vCPU 但同時 expired 6 vCPU，淨增 +18 vCPU，大部分 project 只有 ~42% coverage
 3. Local SSD 有 $7.28/天 uncovered，完全沒有 CUD
 4. AlloyDB / BigQuery / Cloud SQL / Cloud Run 都有 eligible usage 但 0 active CUDs
 
 ## 待確認
 
-- [ ] N2 CUD 續買量要多少
-- [ ] E2 CUD 要加購多少才合理（目前 recommendations 建議 22 vCPU + 90.4 GB）
+- [ ] N2 CUD 續買量（expired 共 96 vCPU / 384 GB，要買回多少）
+- [ ] E2 CUD 要加購多少（目前 86 vCPU 只覆蓋 71.5%，recommendations 建議再加 22 vCPU + 90.4 GB）
 - [ ] Local SSD CUD 是否值得買
 - [ ] beta/stage 環境是否值得納入 CUD 考量（用量穩定的話可以）
 - [ ] AlloyDB / Cloud SQL 的 spend-based CUD 是否要買
+- [ ] N1 CUD（PVMax 16 vCPU）是否需要續買
